@@ -160,7 +160,7 @@ class AbstractSolver(ABC):
 
     def _time_enumerate(self, collection):
         for i, val in enumerate(collection):
-            if i==0:
+            if i == 0:
                 pass
             else:
                 yield i, val, collection[:i + 1]
@@ -209,7 +209,7 @@ class VolterraSecMarch(AbstractSolver):
     def __init__(self):
         pass
 
-    def evaluate(self, initial_value: float):
+    def evaluate(self, initial_value: float) -> object:
         """
         Evaluate the integral over the specified t values for the given K function
 
@@ -234,7 +234,8 @@ class VolterraSecMarch(AbstractSolver):
             f[0] = initial_value
             for i, t_i, time_arr in self._time_enumerate(self.time_array):
                 k = self._evaluate_kernel(t_i, time_arr)
-                f[i] = (self.h * (k[0] * f[0] / 2 + np.sum(f[1:i] * k[1:i])) + self.g_vals[i])/(1 - k[-1] * self.h / 2)
+                f[i] = (self.h * (k[0] * f[0] / 2 + np.sum(f[1:i] * k[1:i])) + self.g_vals[i]) / (
+                            1 - k[-1] * self.h / 2)
 
         return Results(self.time_array, f, int_time.get_time())
 
