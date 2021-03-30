@@ -159,8 +159,11 @@ class AbstractSolver(ABC):
         self.time_array = t
 
     def _time_enumerate(self, collection):
-        for i, val in enumerate(collection[1:]):
-            yield i, val, collection[:i + 1]
+        for i, val in enumerate(collection):
+            if i==0:
+                pass
+            else:
+                yield i, val, collection[:i + 1]
 
     def _evaluate_kernel(self, t_0, t_arr):
         return self.kernel(t_arr, t_0, self.kernel_args)
@@ -177,13 +180,6 @@ class AbstractSolver(ABC):
         A dummy method used to force inheritance to all child classes
         """
         pass
-
-
-def _evaluate_hidden(time_array, _time_enumerate, _evaluate_kernel, f, g, h):
-    for i, t_i, time_arr in _time_enumerate(time_array):
-        k = _evaluate_kernel(t_i, time_arr)
-        f[i] = (h * (k[0] * f[0] / 2 + np.sum(f[1:i] * k[1:i])) + g[i]) / (1 - k[-1] * h / 2)
-    return f
 
 
 class VolterraSecMarch(AbstractSolver):
@@ -236,7 +232,9 @@ class VolterraSecMarch(AbstractSolver):
             self._set_up()
             f = np.zeros(len(self.time_array))
             f[0] = initial_value
-            f = _evaluate_hidden(self.time_array, self._time_enumerate, self._evaluate_kernel, f, self.g_vals, self.h)
+            for i, t_i, time_arr in self._time_enumerate(self.time_array):
+                k = self._evaluate_kernel(t_i, time_arr)
+                f[i] = (self.h * (k[0] * f[0] / 2 + np.sum(f[1:i] * k[1:i])) + self.g_vals[i])/(1 - k[-1] * self.h / 2)
 
         return Results(self.time_array, f, int_time.get_time())
 
