@@ -2,6 +2,7 @@ import numpy as np
 from abc import ABC
 from dataclasses import dataclass
 import time
+from packagerrors import *
 
 
 @dataclass(frozen=True)
@@ -169,7 +170,19 @@ class AbstractSolver(ABC):
         return self.kernel(t_arr, t_0, self.kernel_args)
 
     def _set_up(self):
+
+        try:
+            self.time_array
+        except AttributeError:
+            raise MethodOrderError('time array')
+
+        try:
+            self.kernel_args
+        except AttributeError:
+            raise MethodOrderError('Kernel')
+
         self.h = self.time_array[1] - self.time_array[0]
+
         try:
             self.g_vals = self.g(self.time_array, self.g_args)
         except AttributeError:
@@ -235,7 +248,7 @@ class VolterraSecMarch(AbstractSolver):
             for i, t_i, time_arr in self._time_enumerate(self.time_array):
                 k = self._evaluate_kernel(t_i, time_arr)
                 f[i] = (self.h * (k[0] * f[0] / 2 + np.sum(f[1:i] * k[1:i])) + self.g_vals[i]) / (
-                            1 - k[-1] * self.h / 2)
+                        1 - k[-1] * self.h / 2)
 
         return Results(self.time_array, f, int_time.get_time())
 
@@ -285,7 +298,7 @@ class VolterraSecBlcByBlc(AbstractSolver):
 
         """
         if N <= 1:
-            raise Exception('Error: block length must be greater them 1')
+            raise BlockLengthError
         self.block_len = N
 
     def set_time_array(self, t: np.ndarray):
@@ -312,10 +325,10 @@ class VolterraSecBlcByBlc(AbstractSolver):
         try:
             self.block_len
         except AttributeError:
-            raise Exception('Error: No block length defined.')
+            raise MethodOrderError('block length')
 
         if len(t) % self.block_len != 0:
-            raise Exception('Error: y values must be a integer multiple of the block length.')
+            raise TimeLenthError
 
         self.time_array = t
 
@@ -351,7 +364,7 @@ class VolterraSecBlcByBlc(AbstractSolver):
 
             for i, t_i, time_arr in self._time_enumerate(self.time_array):
                 kernel = self._evaluate_kernel(t_i, time_arr)
-                self.f = np.append(self.f, _val_at_t(i, t_i, time_arr, kernel, self.f, self.g_vals))
+                self.f = np.append(self.f, self._val_at_t(i, t_i, time_arr, kernel, self.f, self.g_vals))
 
         return Results(self.time_array, self.f, int_time.get_time())
 

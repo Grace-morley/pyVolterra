@@ -2,6 +2,7 @@ import pyvolterra as pv
 from matplotlib import pyplot as plt
 import numpy as np
 import unittest
+from packagerrors import *
 
 
 class TestVolterraSecond(unittest.TestCase):
@@ -26,9 +27,8 @@ class TestVolterraSecond(unittest.TestCase):
         psi_3 = (results.y[1:] - psi_2[1:]) / psi_2[1:]
 
         self.assertIsInstance(results, pv.Results)
-        self.assertTrue(all([True if i <= 10**-8 else False for i in psi_3]))
+        self.assertTrue(all([True if i <= 10 ** -8 else False for i in psi_3]))
         self.assertTrue(True if results.time_elapsed <= 20 else False)
-
 
     def test_VolterraMartch2(self):
         t = np.linspace(0, 10, 50001)
@@ -46,6 +46,7 @@ class TestVolterraSecond(unittest.TestCase):
         results = test_class.evaluate(1)
 
         self.assertTrue(True if results.time_elapsed <= 20 else False)
+
 
 if __name__ == '__main__':
     unittest.main()
