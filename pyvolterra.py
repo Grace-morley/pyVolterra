@@ -70,6 +70,9 @@ class Timer:
         """
         return self.elapsed_time
 
+def block(block_len, time_len):
+    for i in range(time_len/block_len-1):
+        yield
 
 class AbstractSolver(ABC):
     """
@@ -92,7 +95,6 @@ class AbstractSolver(ABC):
 
     evaluate() :
         A dummy method included to force inheritance in child classes.
-
     """
 
     def __init__(self):
@@ -220,7 +222,7 @@ class VolterraSecMarch(AbstractSolver):
     """
 
     def __init__(self):
-        pass
+        super().__init__()
 
     def evaluate(self, initial_value: float) -> object:
         """
@@ -280,7 +282,7 @@ class VolterraSecBlcByBlc(AbstractSolver):
     """
 
     def __init__(self):
-        pass
+        super().__init__()
 
     def set_block_length(self, N: int):
         """
@@ -364,7 +366,7 @@ class VolterraSecBlcByBlc(AbstractSolver):
 
             for i, t_i, time_arr in self._time_enumerate(self.time_array):
                 kernel = self._evaluate_kernel(t_i, time_arr)
-                self.f = np.append(self.f, self._val_at_t(i, t_i, time_arr, kernel, self.f, self.g_vals))
+                self.f = np.append(self.f, self._val_at_t(i, t_i, time_arr))
 
         return Results(self.time_array, self.f, int_time.get_time())
 
